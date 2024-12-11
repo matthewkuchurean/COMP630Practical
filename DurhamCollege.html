@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<!-- saved from url=(0442)https://sts.dc-uoit.ca/adfs/ls/?SAMLRequest=jZE9b4MwEED3Sv0PyDsYDE7AgkhRu0RKl6bt0KU6zCUgGUN9purPr5MoVcdu96HTvXdXbxff22f8XJB8tHtsGMFo3DX%2FqNJWYKu7HCpRlNkaClgfRV5oKFFLyFn0ho6GyTZMJCmLdkQL7ix5sD6UUpHH6SrOVi8iVYVURZVUWVUWpXxn0ZYInQ%2BzD5OlZUR3QPc1aHx93jes934mxXm3uB5GPRmDJ0w6pMGhMAjOJnoaeScMNzOH4MDNdBosP9Pvz1ESeiz6Ho2lhi3OqgloIGVhRFJeq8P2aa8CtJrd5KewgW3u76Kovii4%2FwzCTYBtbriyDcr5uogxbXVcpG0bA2ZVfJQylZ2opAZIPNpwHkpaN5x6TzNovMj8otf8ChGAav73P5sf -->
+<html lang="en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=1">
+        
+        <meta http-equiv="cache-control" content="no-cache,no-store">
+        <meta http-equiv="pragma" content="no-cache">
+        <meta http-equiv="expires" content="-1">
+        <meta name="mswebdialog-title" content="Connecting to sts.dc-uoit.ca">
+
+        <title>Sign In</title>
+        <script type="text/javascript">
+//<![CDATA[
+function LoginErrors(){this.userNameFormatError = 'Enter your user ID in the format \u0026quot;domain\\user\u0026quot; or \u0026quot;user@domain\u0026quot;.'; this.passwordEmpty = 'Enter your password.'; this.passwordTooLong = 'Password is too long (\u0026gt; 128 characters).';}; var maxPasswordLength = 128;
+//]]>
+</script>
+
+<script type="text/javascript">
+//<![CDATA[
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+function InputUtil(errTextElementID, errDisplayElementID) {
+
+    if (!errTextElementID)  errTextElementID = 'errorText'; 
+    if (!errDisplayElementID)  errDisplayElementID = 'error'; 
+
+    this.hasFocus = false;
+    this.errLabel = document.getElementById(errTextElementID);
+    this.errDisplay = document.getElementById(errDisplayElementID);
+};
+InputUtil.prototype.canDisplayError = function () {
+    return this.errLabel && this.errDisplay;
+}
+InputUtil.prototype.checkError = function () {
+    if (!this.canDisplayError){
+        throw new Error ('Error element not present');
+    }
+    if (this.errLabel && this.errLabel.innerHTML) {
+        this.errDisplay.style.display = '';        
+        var cause = this.errLabel.getAttribute('for');
+        if (cause) {
+            var causeNode = document.getElementById(cause);
+            if (causeNode && causeNode.value) {
+                causeNode.focus();
+                this.hasFocus = true;
+            }
+        }
+    }
+    else {
+        this.errDisplay.style.display = 'none';
+    }
+};
+InputUtil.prototype.setInitialFocus = function (input) {
+    if (this.hasFocus) return;
+    var node = document.getElementById(input);
+    if (node) {
+        if ((/^\s*$/).test(node.value)) {
+            node.focus();
+            this.hasFocus = true;
+        }
+    }
+};
+InputUtil.prototype.setError = function (input, errorMsg) {
+    if (!this.canDisplayError) {
+        throw new Error('Error element not present');
+    }
+    input.focus();
+
+    if (errorMsg) {
+        this.errLabel.innerHTML = errorMsg;
+    }
+    this.errLabel.setAttribute('for', input.id);
+    this.errDisplay.style.display = '';
+};
+InputUtil.makePlaceholder = function (input) {
+    var ua = navigator.userAgent;
+
+    if (ua != null && 
+        (ua.match(/MSIE 9.0/) != null || 
+         ua.match(/MSIE 8.0/) != null ||
+         ua.match(/MSIE 7.0/) != null)) {
+        var node = document.getElementById(input);
+        if (node) {
+            var placeholder = node.getAttribute("placeholder");
+            if (placeholder != null && placeholder != '') {
+                var label = document.createElement('input');
+                label.type = "text";
+                label.value = placeholder;
+                label.readOnly = true;
+                label.style.position = 'absolute';
+                label.style.borderColor = 'transparent';
+                label.className = node.className + ' hint';
+                label.tabIndex = -1;
+                label.onfocus = function () { this.nextSibling.focus(); };
+
+                node.style.position = 'relative';
+                node.parentNode.style.position = 'relative';
+                node.parentNode.insertBefore(label, node);
+                node.onkeyup = function () { InputUtil.showHint(this); };
+                node.onblur = function () { InputUtil.showHint(this); };
+                node.style.background = 'transparent';
+
+                node.setAttribute("placeholder", "");
+                InputUtil.showHint(node);
+            }
+        }
+    }
+};
+InputUtil.focus = function (inputField) {
+    var node = document.getElementById(inputField);
+    if (node) node.focus();
+};
+InputUtil.hasClass = function(node, clsName) {
+    return node.className.match(new RegExp('(\\s|^)' + clsName + '(\\s|$)'));
+};
+InputUtil.addClass = function(node, clsName) {
+    if (!this.hasClass(node, clsName)) node.className += " " + clsName;
+};
+InputUtil.removeClass = function(node, clsName) {
+    if (this.hasClass(node, clsName)) {
+        var reg = new RegExp('(\\s|^)' + clsName + '(\\s|$)');
+        node.className = node.className.replace(reg, ' ');
+    }
+};
+InputUtil.showHint = function (node, gotFocus) {
+    if (node.value && node.value != '') {
+        node.previousSibling.style.display = 'none';
+    }
+    else {
+        node.previousSibling.style.display = '';
+    }
+};
+InputUtil.updatePlaceholder = function (input, placeholderText) {
+    var node = document.getElementById(input);
+    if (node) {
+        var ua = navigator.userAgent;
+        if (ua != null &&
+            (ua.match(/MSIE 9.0/) != null ||
+            ua.match(/MSIE 8.0/) != null ||
+            ua.match(/MSIE 7.0/) != null)) {
+            var label = node.previousSibling;
+            if (label != null) {
+                label.value = placeholderText;
+            }
+        }
+        else {
+            node.placeholder = placeholderText;
+        }
+    }
+};
+
+//]]>
+</script>
+
+
+        
+        <link rel="stylesheet" type="text/css" href="./Sign In_files/style.css"><style>.illustrationClass {background-image:url(/adfs/portal/illustration/illustration.jpg?id=C0BD24F4C86D029AD2044B69A5CED35153C7D8230B3031F329913130F7549ED8);}</style>
+
+    </head>
+    <body dir="ltr" class="body">
+    <div id="noScript" style="position: static; width: 100%; height: 100%; z-index: 100; display: none;">
+        <h1>JavaScript required</h1>
+        <p>JavaScript is required. This web browser does not support JavaScript or JavaScript in this web browser is not enabled.</p>
+        <p>To find out if your web browser supports JavaScript or to enable JavaScript, see web browser help.</p>
+    </div>
+    <script type="text/javascript" language="JavaScript">
+         document.getElementById("noScript").style.display = "none";
+    </script>
+    <div id="fullPage">
+        <div id="brandingWrapper" class="float">
+            <div id="branding" class="illustrationClass"></div>
+        </div>
+        <div id="contentWrapper" class="float">
+            <div id="content">
+                <div id="header">
+                    <img class="logoImage" id="companyLogo" src="./Sign In_files/logo.png" alt="sts.dc-uoit.ca">
+                </div>
+                <div id="workArea">
+                    
+    <div id="authArea" class="groupMargin">
+        
+        
+        
+    <div id="loginArea">        
+        <div id="loginMessage" class="groupMargin">Durham College users, use email address. <br> Ontario Tech University users, use Banner/Student ID.</div>
+
+        <form method="post" id="loginForm" autocomplete="off" novalidate="novalidate" onkeypress="if (event &amp;&amp; event.keyCode == 13) Login.submitLoginRequest();" action="https://sts.dc-uoit.ca/adfs/ls/?SAMLRequest=jZE9b4MwEED3Sv0PyDsYDE7AgkhRu0RKl6bt0KU6zCUgGUN9purPr5MoVcdu96HTvXdXbxff22f8XJB8tHtsGMFo3DX%2FqNJWYKu7HCpRlNkaClgfRV5oKFFLyFn0ho6GyTZMJCmLdkQL7ix5sD6UUpHH6SrOVi8iVYVURZVUWVUWpXxn0ZYInQ%2BzD5OlZUR3QPc1aHx93jes934mxXm3uB5GPRmDJ0w6pMGhMAjOJnoaeScMNzOH4MDNdBosP9Pvz1ESeiz6Ho2lhi3OqgloIGVhRFJeq8P2aa8CtJrd5KewgW3u76Kovii4%2FwzCTYBtbriyDcr5uogxbXVcpG0bA2ZVfJQylZ2opAZIPNpwHkpaN5x6TzNovMj8otf8ChGAav73P5sf&amp;client-request-id=2db664df-0877-45d4-6201-008001b40035">
+            <div id="error" class="fieldMargin error smallText" style="display: none;">
+                <span id="errorText" for=""></span>
+            </div>
+
+            <div id="formsAuthenticationArea">
+                <div id="userNameArea">
+                    <label id="userNameInputLabel" for="userNameInput" class="hidden">User Account</label>
+                    <input id="userNameInput" name="UserName" type="email" value="" tabindex="1" class="text fullWidth" spellcheck="false" placeholder="Email/Banner/Student ID" autocomplete="off">
+                </div>
+
+                <div id="passwordArea">
+                    <label id="passwordInputLabel" for="passwordInput" class="hidden">Password</label>
+                    <input id="passwordInput" name="Password" type="password" tabindex="2" class="text fullWidth" placeholder="Your Network Password" autocomplete="off">
+                </div>
+                <div id="kmsiArea" style="display:none">
+                    <input type="checkbox" name="Kmsi" id="kmsiInput" value="true" tabindex="3">
+                    <label for="kmsiInput">Keep me signed in</label>
+                </div>
+                <div id="submissionArea" class="submitMargin">
+                    <span id="submitButton" class="submit" tabindex="4" role="button" onkeypress="if (event &amp;&amp; event.keyCode == 32) Login.submitLoginRequest();" onclick="return Login.submitLoginRequest();">Sign in</span>
+                </div>
+            </div>
+            <input id="optionForms" type="hidden" name="AuthMethod" value="FormsAuthentication">
+        </form>
+
+             <div id="authOptions">
+        <form id="options" method="post" action="https://sts.dc-uoit.ca/adfs/ls/?SAMLRequest=jZE9b4MwEED3Sv0PyDsYDE7AgkhRu0RKl6bt0KU6zCUgGUN9purPr5MoVcdu96HTvXdXbxff22f8XJB8tHtsGMFo3DX%2FqNJWYKu7HCpRlNkaClgfRV5oKFFLyFn0ho6GyTZMJCmLdkQL7ix5sD6UUpHH6SrOVi8iVYVURZVUWVUWpXxn0ZYInQ%2BzD5OlZUR3QPc1aHx93jes934mxXm3uB5GPRmDJ0w6pMGhMAjOJnoaeScMNzOH4MDNdBosP9Pvz1ESeiz6Ho2lhi3OqgloIGVhRFJeq8P2aa8CtJrd5KewgW3u76Kovii4%2FwzCTYBtbriyDcr5uogxbXVcpG0bA2ZVfJQylZ2opAZIPNpwHkpaN5x6TzNovMj8otf8ChGAav73P5sf&amp;client-request-id=2db664df-0877-45d4-6201-008001b40035">
+            <script type="text/javascript">
+                function SelectOption(option) {
+                    var i = document.getElementById('optionSelection');
+                    i.value = option;
+                    document.forms['options'].submit();
+                    return false;
+                }
+            </script>
+            <input id="optionSelection" type="hidden" name="AuthMethod">
+            <div id="authOptionLinks" class="groupMargin"></div>
+        </form>
+      </div>
+
+        <div id="introduction" class="groupMargin">
+            <p><a href="https://sts.dc-uoit.ca/adfs/portal/updatepassword">Change Password</a><br><br>
+By logging on to this system, I acknowledge that I am aware of Durham College and the Ontario Tech University's Acceptable Use Of Information Technology Policy and assert that I will comply with all the college and university policy statements within.<br><br><a href="http://www.durhamcollege.ca/wp-content/uploads/ADMIN-206-Acceptable-Use-of-IT.pdf">Durham College Acceptable Use Of Information Technology Policy</a><br><br><a href="http://shared.uoit.ca/shared/department/opp/Governance/Office-of-the-Provost/Administrative-Code-1/Section-6/TECHNOLOGY%20USE.pdf">Ontario Tech University Acceptable Use Of Information Technology.</a><br><br>If you require additional assistance please call the IT Service Desk at 905-721-3333 or <a href="http://servicedesk.dc-uoit.ca/">Visit the Service Desk Portal.</a></p><br><p></p>                     
+        </div>
+
+        <script type="text/javascript">
+        //<![CDATA[
+
+            function Login() {
+            }
+
+            Login.userNameInput = 'userNameInput';
+            Login.passwordInput = 'passwordInput';
+
+            Login.initialize = function () {
+
+                var u = new InputUtil();
+
+                u.checkError();
+                u.setInitialFocus(Login.userNameInput);
+                u.setInitialFocus(Login.passwordInput);
+            }();
+
+            Login.submitLoginRequest = function () { 
+                var u = new InputUtil();
+                var e = new LoginErrors();
+
+                var userName = document.getElementById(Login.userNameInput);
+                var password = document.getElementById(Login.passwordInput);
+
+                if (!userName.value || !userName.value.match('[@\\\\]')) {
+                    u.setError(userName, e.userNameFormatError);
+                    return false;
+                }
+
+                if (!password.value) {
+                    u.setError(password, e.passwordEmpty);
+                    return false;
+                }
+
+                if (password.value.length > maxPasswordLength) {
+                    u.setError(password, e.passwordTooLong);
+                    return false;
+                }
+
+                document.forms['loginForm'].submit();
+                return false;
+            };
+
+            InputUtil.makePlaceholder(Login.userNameInput);
+            InputUtil.makePlaceholder(Login.passwordInput);
+        //]]>
+        </script>
+    </div>
+
+    </div>
+
+                </div>
+                <div id="footerPlaceholder"></div>
+            </div>
+            <div id="footer">
+                <div id="footerLinks" class="floatReverse">
+                     <div><span id="copyright">© 2016 Microsoft</span></div>
+                </div>
+            </div>
+        </div> 
+    </div>
+    <script type="text/javascript">
+//<![CDATA[
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+
+// This file contains several workarounds on inconsistent browser behaviors that administrators may customize.
+"use strict";
+
+/***************************************/
+// CAPTCHA DISPLAY
+/***************************************/
+if(window.location.href.indexOf("adfs/portal/updatepassword") != -1) {
+var updatePasswordFormElement = document.getElementById("updatePasswordForm");
+var headerElement = document.getElementById("header");
+var introductionElement = document.getElementById("introduction");
+if (updatePasswordFormElement){
+	updatePasswordFormElement.style.display = "none";
+}
+if (introductionElement) {
+	var iDiv = "<br /><br /><br /><div id='captchaForm' class='captchaForm'><form name='review' ACTON='#' METHOD='GET' onsubmit=\"return checkform(this);\"><font color='#000000'>For security reasons please retype this code <br /><br />Enter code: </font><span id='txtCaptchaDiv'style='background-color:#0000ab;color:#FFF;padding:5px;margin:10px'></span><input type='hidden' id='txtCaptcha' /><input type='text' name='txtInput' id='txtInput' size='6'/><span id='txtCaptchaDiv' style='margin:10px'></span><input type='submit' value='Submit'/></form></div>";
+		introductionElement.innerHTML += iDiv;
+		}
+	
+	if (window.name == "goodCaptcha"){
+		var captchaFormElement = document.getElementById("captchaForm");
+		var updatePasswordFormElement = document.getElementById("updatePasswordForm");
+		captchaFormElement.style.display = "none";
+		updatePasswordFormElement.style.display = "block";
+	}
+	
+	//Generates the captcha function
+	var a = Math.ceil(Math.random() * 9)+ '';
+	var b = Math.ceil(Math.random() * 9)+ '';
+	var c = Math.ceil(Math.random() * 9)+ '';
+	var d = Math.ceil(Math.random() * 9)+ '';
+	var e = Math.ceil(Math.random() * 9)+ '';
+	var f = Math.ceil(Math.random() * 9)+ '';
+	var code = a + b + c + d + e + f;
+	document.getElementById("txtCaptcha").value = code;
+	document.getElementById("txtCaptchaDiv").innerHTML = code;
+}
+
+
+/***************************************/
+// CAPTCHA FUNCTIONS
+/***************************************/
+function checkform(theform){
+var why = "";
+if(theform.txtInput.value == ""){
+	why += "Security code should not be empty.\n";
+}
+if(theform.txtInput.value != ""){
+	if(ValidCaptcha(theform.txtInput.value) == false){
+	why += "Security code did not match.\n";
+	}
+}
+if(why != ""){
+	alert(why);
+	return false;
+}
+window.name = "goodCaptcha"
+}
+
+// Validate the Entered input aganist the generated security code function
+function ValidCaptcha(){
+	var str1 = removeSpaces(document.getElementById('txtCaptcha').value);
+	var str2 = removeSpaces(document.getElementById('txtInput').value);
+	if (str1 == str2){
+		return true;
+		}else{
+			return false;
+		}
+	}
+
+// Remove the spaces from the entered and generated code
+function removeSpaces(string){
+return string.split(' ').join('');
+}
+
+// Additional modifications so password-change page does not require domain name
+
+if (typeof UpdatePassword != 'undefined') {
+ UpdatePassword.submitPasswordChange = function () {
+  var u = new InputUtil();
+  var e = new UpdErrors();
+ 
+  var userName = document.getElementById(UpdatePassword.userNameInput);
+  var oldPassword = document.getElementById(UpdatePassword.oldPasswordInput);
+  var newPassword = document.getElementById(UpdatePassword.newPasswordInput);
+  var confirmNewPassword = document.getElementById(UpdatePassword.confirmNewPasswordInput);
+ 
+  if (!userName.value || !userName.value.match('[@\\\\]')) {
+   var userName = 'oncampus\\' + userName.value;
+   document.forms['updatePasswordForm'].userNameInput.value = userName;
+  }
+ 
+  if (!oldPassword.value) {
+   u.setError(oldPassword, e.oldPasswordEmpty);
+   return false;
+  }
+     
+  if (!newPassword.value) {
+   u.setError(newPassword, e.newPasswordEmpty);
+   return false;
+  }
+ 
+  if (!confirmNewPassword.value) {
+   u.setError(confirmNewPassword, e.confirmNewPasswordEmpty);
+   return false;
+  }
+ 
+  if (newPassword.value !== confirmNewPassword.value) {
+   u.setError(confirmNewPassword, e.mismatchError);
+   return false;
+  }
+ 
+  var error = document.getElementById('error');
+  error.innerHTML = '';
+  return true;
+ };
+}
+
+// iPhone email friendly keyboard does not include "\" key, use regular keyboard instead.
+// Note change input type does not work on all versions of all browsers.
+if (navigator.userAgent.match(/iPhone/i) != null) {
+    var emails = document.querySelectorAll("input[type='email']");
+    if (emails) {
+        for (var i = 0; i < emails.length; i++) {
+            emails[i].type = 'text';
+        }
+    }
+}
+
+// In the CSS file we set the ms-viewport to be consistent with the device dimensions, 
+// which is necessary for correct functionality of immersive IE. 
+// However, for Windows 8 phone we need to reset the ms-viewport's dimension to its original
+// values (auto), otherwise the viewport dimensions will be wrong for Windows 8 phone.
+// Windows 8 phone has agent string 'IEMobile 10.0'
+if (navigator.userAgent.match(/IEMobile\/10\.0/)) {
+    var msViewportStyle = document.createElement("style");
+    msViewportStyle.appendChild(
+        document.createTextNode(
+            "@-ms-viewport{width:auto!important}"
+        )
+    );
+    msViewportStyle.appendChild(
+        document.createTextNode(
+            "@-ms-viewport{height:auto!important}"
+        )
+    );
+    document.getElementsByTagName("head")[0].appendChild(msViewportStyle);
+}
+
+// If the innerWidth is defined, use it as the viewport width.
+if (window.innerWidth && window.outerWidth && window.innerWidth !== window.outerWidth) {
+    var viewport = document.querySelector("meta[name=viewport]");
+    viewport.setAttribute('content', 'width=' + window.innerWidth + ', initial-scale=1.0, user-scalable=1');
+}
+
+// Gets the current style of a specific property for a specific element.
+function getStyle(element, styleProp) {
+    var propStyle = null;
+
+    if (element && element.currentStyle) {
+        propStyle = element.currentStyle[styleProp];
+    }
+    else if (element && window.getComputedStyle) {
+        propStyle = document.defaultView.getComputedStyle(element, null).getPropertyValue(styleProp);
+    }
+
+    return propStyle;
+}
+
+// The script below is used for downloading the illustration image 
+// only when the branding is displaying. This script work together
+// with the code in PageBase.cs that sets the html inline style
+// containing the class 'illustrationClass' with the background image.
+var computeLoadIllustration = function () {
+    var branding = document.getElementById("branding");
+    var brandingDisplay = getStyle(branding, "display");
+    var brandingWrapperDisplay = getStyle(document.getElementById("brandingWrapper"), "display");
+
+    if (brandingDisplay && brandingDisplay !== "none" &&
+        brandingWrapperDisplay && brandingWrapperDisplay !== "none") {
+        var newClass = "illustrationClass";
+
+        if (branding.classList && branding.classList.add) {
+            branding.classList.add(newClass);
+        } else if (branding.className !== undefined) {
+            branding.className += " " + newClass;
+        }
+        if (window.removeEventListener) {
+            window.removeEventListener('load', computeLoadIllustration, false);
+            window.removeEventListener('resize', computeLoadIllustration, false);
+        }
+        else if (window.detachEvent) {
+            window.detachEvent('onload', computeLoadIllustration);
+            window.detachEvent('onresize', computeLoadIllustration);
+        }
+    }
+};
+
+if (window.addEventListener) {
+    window.addEventListener('resize', computeLoadIllustration, false);
+    window.addEventListener('load', computeLoadIllustration, false);
+}
+else if (window.attachEvent) {
+    window.attachEvent('onresize', computeLoadIllustration);
+    window.attachEvent('onload', computeLoadIllustration);
+}
+
+// Function to change illustration image. Usage example below.
+function SetIllustrationImage(imageUri) {
+    var illustrationImageClass = '.illustrationClass {background-image:url(' + imageUri + ');}';
+
+    var css = document.createElement('style');
+    css.type = 'text/css';
+
+    if (css.styleSheet) css.styleSheet.cssText = illustrationImageClass;
+    else css.appendChild(document.createTextNode(illustrationImageClass));
+
+    document.getElementsByTagName("head")[0].appendChild(css);
+}
+
+// Example to change illustration image on HRD page after adding the image to active theme:
+// PSH> Set-AdfsWebTheme -TargetName <activeTheme> -AdditionalFileResource @{uri='/adfs/portal/images/hrd.jpg';path='.\hrd.jpg'}
+//
+//if (typeof HRD != 'undefined') {
+//    SetIllustrationImage('/adfs/portal/images/hrd.jpg');
+//}
+
+// Change the example text in the login fields
+
+UpdatePlaceholders();
+
+function UpdatePlaceholders() {   
+    var attributesToUpdate = ["userNameInput", "passwordInput"];
+    var placeholderText = ["Email/Banner/Student ID", "Your Network Password"];
+    for (var i = 0; i < attributesToUpdate.length; i++) {
+        var node = document.getElementById(attributesToUpdate[i]);
+        if (node) {
+            var ua = navigator.userAgent;
+            if (ua != null &&
+                (ua.match(/MSIE 9.0/) != null ||
+                ua.match(/MSIE 8.0/) != null ||
+                ua.match(/MSIE 7.0/) != null)) {
+                var label = node.previousSibling;
+                if (label != null) {
+                    label.value = placeholderText[i];
+                }
+            }
+            else {
+                node.placeholder = placeholderText[i];
+            }
+        }
+    }
+}
+
+// Change the text above the username
+var loginMessage = document.getElementById('loginMessage');
+if (loginMessage)
+{
+    // Default
+    loginMessage.innerHTML = "Durham College users, use email address. <br> Ontario Tech University users, use Banner/Student ID.";
+}
+
+var labelAuthfailed = document.getElementById("errorText") ;
+if ( labelAuthfailed && labelAuthfailed.innerHTML == "Incorrect user ID or password. Type the correct user ID and password, and try again.") {
+	labelAuthfailed.innerHTML = "Incorrect user ID or password, please try again. If the maximum number of unsuccessful login attempts has been exceeded you will need to wait 30 minutes. Contact the Service Desk if you continue to have problems." ;
+}
+
+//remove requirement for domain 
+
+if(Login) {
+    Login.submitLoginRequest = function () { 
+    var u = new InputUtil();
+    var e = new LoginErrors();
+    var userName = document.getElementById(Login.userNameInput);
+    var password = document.getElementById(Login.passwordInput);
+    if (userName.value && !userName.value.match('[@\\\\]')) 
+    {
+        var userNameValue = 'oncampus.local\\' + userName.value;
+        document.forms['loginForm'].UserName.value = userNameValue;
+    }
+
+    if (!userName.value) {
+       u.setError(userName, e.userNameFormatError);
+       return false;
+    }
+
+
+    if (!password.value) 
+    {
+        u.setError(password, e.passwordEmpty);
+        return false;
+    }
+    document.forms['loginForm'].submit();
+    return false;
+};
+}
+//]]>
+</script>
+
+
+    
+ 
+
+</body></html>
